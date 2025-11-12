@@ -1,0 +1,88 @@
+# 🩺 Analyse du Dataset Regensburg Pediatric Appendicitis (UCI Repository)
+
+Ce projet explore le dataset **Regensburg Pediatric Appendicitis** disponible sur la [UCI Machine Learning Repository](https://archive.ics.uci.edu/).  
+L’objectif est de réaliser une **analyse exploratoire des données (EDA)** comprenant des visualisations, statistiques descriptives et corrélations entre les variables.
+
+---
+
+## 📦 Installation des dépendances
+
+```bash
+pip install ucimlrepo pandas numpy seaborn matplotlib
+# -*- coding: utf-8 -*-
+"""Analyse du dataset Regensburg Pediatric Appendicitis"""
+
+# 1️⃣ Importation des librairies
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from ucimlrepo import fetch_ucirepo
+
+# 2️⃣ Chargement du dataset
+dataset = fetch_ucirepo(id=938)
+X = dataset.data.features
+y = dataset.data.targets
+data = pd.concat([X, y], axis=1)
+
+# 3️⃣ Informations générales
+print("🧩 Dimensions du dataset :", data.shape)
+print("\n🔹 Aperçu des premières lignes :")
+display(data.head())
+
+print("\n🔹 Informations sur les colonnes :")
+data.info()
+
+print("\n🔹 Statistiques descriptives :")
+display(data.describe(include='all'))
+
+# 4️⃣ Vérification des valeurs manquantes
+print("\n🚨 Valeurs manquantes par colonne :")
+display(data.isnull().sum())
+
+# 5️⃣ Analyse de la variable cible
+target_col = y.columns[0]
+print(f"\n🎯 Distribution de la variable cible '{target_col}' :")
+display(y[target_col].value_counts())
+
+plt.figure(figsize=(5,4))
+sns.countplot(data=y, x=target_col, palette="viridis")
+plt.title("Distribution de la variable cible")
+plt.show()
+
+# 6️⃣ Distribution des variables numériques
+num_cols = X.select_dtypes(include=np.number).columns
+X[num_cols].hist(figsize=(15,10), bins=15, color='skyblue', edgecolor='black')
+plt.suptitle("Distribution des variables numériques", fontsize=16)
+plt.show()
+
+# 7️⃣ Analyse de corrélation
+plt.figure(figsize=(10,8))
+corr = X[num_cols].corr()
+sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
+plt.title("Matrice de corrélation des variables numériques")
+plt.show()
+
+# 8️⃣ Analyse bivariée (relation entre certaines variables et la cible)
+for col in num_cols[:5]:
+    plt.figure(figsize=(6,4))
+    sns.boxplot(x=y[target_col], y=X[col], palette="Set2")
+    plt.title(f"{col} vs {target_col}")
+    plt.show()
+
+# 9️⃣ Si certaines variables sont catégorielles :
+cat_cols = X.select_dtypes(exclude=np.number).columns
+if len(cat_cols) > 0:
+    for col in cat_cols:
+        plt.figure(figsize=(6,4))
+        sns.countplot(data=data, x=col, hue=target_col, palette="pastel")
+        plt.title(f"Distribution de {col} selon la variable cible")
+        plt.xticks(rotation=45)
+        plt.show()
+
+# 🔟 Résumé rapide
+print("✅ Analyse exploratoire terminée.")
+print(f"- Nombre de variables numériques : {len(num_cols)}")
+print(f"- Nombre de variables catégorielles : {len(cat_cols)}")
+print(f"- Variable cible : {target_col}")
+
